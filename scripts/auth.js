@@ -9,7 +9,7 @@ signupForm.addEventListener('submit', (e) => {
   // Preventing the default action
   e.preventDefault();
 
-  // Saving the values of the email and password in variables
+  // Get the user info
   const email = signupForm['signup-email'].value;
   const password = signupForm['signup-password'].value;
 
@@ -22,7 +22,7 @@ signupForm.addEventListener('submit', (e) => {
     // Clearing the form
     signupForm.reset();
 
-    // Using materialize JS to close the modal after signup
+    // Closing the modal after signup
     M.Modal.getInstance(modal).close();
   });
 });
@@ -43,3 +43,32 @@ logout.addEventListener('click', (e) => {
     console.log('user signed out');
   });
 });
+
+// // Login a signed up user
+
+// Create a login form reference
+const loginForm = document.querySelector('#login-form');
+
+// Listen to the submit event
+loginForm.addEventListener('submit', (e) => {
+
+  // Preventing the default action
+  e.preventDefault();
+
+  // Get the user info
+  const email = loginForm['login-email'].value;
+  const password = loginForm['login-password'].value;
+
+  // Logging an existing user in
+  auth.signInWithEmailAndPassword(email, password).then(() => {
+
+    // Creating a reference for the login modal
+    let modal = document.querySelector('#login-modal');
+
+    // Clearing the form
+    loginForm.reset();
+
+    // Closing the modal after login
+    M.Modal.getInstance(modal).close();
+  })
+})
