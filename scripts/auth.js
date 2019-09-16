@@ -24,5 +24,22 @@ signupForm.addEventListener('submit', (e) => {
 
     // Using materialize JS to close the modal after signup
     M.Modal.getInstance(modal).close();
-  })
-})
+  });
+});
+
+// // Logout a logged in user
+
+// Create a logout reference
+const logout = document.querySelector('#logout');
+
+// Listen to the click event
+logout.addEventListener('click', (e) => {
+
+  // Preventing the default action
+  e.preventDefault();
+
+  // Logging the user out and logging a message saying so
+  auth.signOut().then(() => {
+    console.log('user signed out');
+  });
+});
