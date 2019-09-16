@@ -63,7 +63,7 @@ loginForm.addEventListener('submit', (e) => {
   auth.signInWithEmailAndPassword(email, password).then(() => {
 
     // Creating a reference for the login modal
-    let modal = document.querySelector('#login-modal');
+    let modal = document.querySelector('#modal-login');
 
     // Clearing the form
     loginForm.reset();
