@@ -1,74 +1,93 @@
-// // Sign a new user up
-
-// Create signup form reference
-const signupForm = document.querySelector('#signup-form');
-
-// Listen to the submit event
-signupForm.addEventListener('submit', (e) => {
-
-  // Preventing the default action
+// Making someone an admin
+const adminForm = document.querySelector('.admin-actions');
+adminForm.addEventListener('submit', (e) => {
   e.preventDefault();
+  const adminEmail = document.querySelector('#admin-email').value;
+  const addAdminRole = functions.httpsCallable('addAdminRole');
+  addAdminRole({email: adminEmail}).then(result => {
+    adminForm.reset();
+    console.log(result);
+  });
+});
 
-  // Get the user info
+
+// Listen for auth status changes
+auth.onAuthStateChanged(user => {
+  if(user) {
+    user.getIdTokenResult().then(idTokenResult => {
+      user.master = idTokenResult.claims.master;
+      setupUI(user);
+    })
+    db.collection('guides').onSnapshot(snapshot => {
+      setupGuides(snapshot.docs);
+    }, err => {
+      console.log(err.message);
+    });
+  } else {
+    setupUI();
+    setupGuides([]);
+  }
+})
+
+
+// Create new guide
+const createForm = document.querySelector('#create-form');
+createForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  db.collection('guides').add({
+    title: createForm['title'].value,
+    content: createForm['content'].value
+  }).then(() => {
+    createForm.reset();
+    const modal = document.querySelector('#modal-create');
+    M.Modal.getInstance(modal).close();
+  }).catch(err => {
+    console.log(err.message);
+  });
+});
+
+
+// Sign a new user up
+const signupForm = document.querySelector('#signup-form');
+signupForm.addEventListener('submit', (e) => {
+  e.preventDefault();
   const email = signupForm['signup-email'].value;
   const password = signupForm['signup-password'].value;
-
-  // Creating a new user using the auth reference we created
-  auth.createUserWithEmailAndPassword(email, password).then(() => {
-
-    // Creating a modal reference
-    const modal = document.querySelector('#modal-signup');
-
-    // Clearing the form
+  auth.createUserWithEmailAndPassword(email, password).then((cred) => {
+    db.collection('users').doc(cred.user.uid).set({
+      bio: signupForm['signup-bio'].value
+    }).then(() => {
+    signupForm.querySelector('.error').innerHTML = '';
     signupForm.reset();
-
-    // Closing the modal after signup
+    const modal = document.querySelector('#modal-signup');
     M.Modal.getInstance(modal).close();
+    });
+  }).catch(err => {
+    signupForm.querySelector('.error').innerHTML = err.message;
   });
 });
 
-// // Logout a logged in user
 
-// Create a logout reference
+// Logout a logged in user
 const logout = document.querySelector('#logout');
-
-// Listen to the click event
 logout.addEventListener('click', (e) => {
-
-  // Preventing the default action
   e.preventDefault();
-
-  // Logging the user out and logging a message saying so
-  auth.signOut().then(() => {
-    console.log('user signed out');
-  });
+  auth.signOut();
 });
 
-// // Login a signed up user
 
-// Create a login form reference
+// Login a signed up user
 const loginForm = document.querySelector('#login-form');
-
-// Listen to the submit event
 loginForm.addEventListener('submit', (e) => {
-
-  // Preventing the default action
   e.preventDefault();
-
-  // Get the user info
   const email = loginForm['login-email'].value;
   const password = loginForm['login-password'].value;
-
-  // Logging an existing user in
   auth.signInWithEmailAndPassword(email, password).then(() => {
-
-    // Creating a reference for the login modal
     let modal = document.querySelector('#modal-login');
-
-    // Clearing the form
     loginForm.reset();
-
-    // Closing the modal after login
+    loginForm.querySelector('.error').innerHTML = '';
     M.Modal.getInstance(modal).close();
-  })
-})
+  }).catch(err => {
+    loginForm.querySelector('.error').innerHTML = err.message;
+  });
+});
